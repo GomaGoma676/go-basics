@@ -34,17 +34,15 @@ func main() {
 	fmt.Printf("task1: %+v\n", *task1p)
 	fmt.Printf("task2: %+v\n", *task2p)
 
-	extendEstimate(task1)
+	task1.extendEstimate()
 	fmt.Printf("task1 value receiver: %+v\n", task1.Estimate)
-	extendEstimatePointer(task1p)
-	fmt.Printf("task1p pointer receiver: %+v\n", (*task1p).Estimate)
-	extendEstimatePointer(&task1)
-	fmt.Printf("task1 pointer receiver: %+v\n", task1.Estimate)
+	task1.extendEstimatePointer()
+	fmt.Printf("task1 value receiver: %+v\n", task1.Estimate)
 }
 
-func extendEstimate(task Task) {
+func (task Task) extendEstimate() {
 	task.Estimate += 10
 }
-func extendEstimatePointer(taskp *Task) {
+func (taskp *Task) extendEstimatePointer() {
 	taskp.Estimate += 10
 }
