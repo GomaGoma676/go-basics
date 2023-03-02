@@ -13,6 +13,7 @@ func main() {
 	}
 	defer file.Close()
 	flags := log.Lshortfile
+	// flags := log.Lshortfile | log.LstdFlags
 	warnLogger := log.New(io.MultiWriter(file, os.Stderr), "WARN: ", flags)
 	errorLogger := log.New(io.MultiWriter(file, os.Stderr), "ERROR: ", flags)
 
