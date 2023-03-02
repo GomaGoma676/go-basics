@@ -19,6 +19,9 @@ go run.
 go run -race .
 #run test
 go test -v .
+#coverage measurement
+go test -v -cover -coverprofile=coverage.out .
+go tool cover -html=coverage.out
 #launch tracer view
 go tool trace trace.out
 ```
