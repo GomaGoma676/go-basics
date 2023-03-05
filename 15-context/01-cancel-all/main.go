@@ -20,15 +20,14 @@ func main() {
 func subTask(ctx context.Context, wg *sync.WaitGroup, id string) {
 	defer wg.Done()
 	t := time.NewTicker(500 * time.Millisecond)
-	for {
-		select {
-		case <-ctx.Done():
-			fmt.Println(ctx.Err())
-			return
-		case <-t.C:
-			t.Stop()
-			fmt.Println(id)
-			return
-		}
+	select {
+	case <-ctx.Done():
+		fmt.Println(ctx.Err())
+		return
+	case <-t.C:
+		t.Stop()
+		fmt.Println(id)
+		return
 	}
+
 }
