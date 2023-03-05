@@ -27,7 +27,5 @@ func subTask(ctx context.Context, wg *sync.WaitGroup, id string) {
 	case <-t.C:
 		t.Stop()
 		fmt.Println(id)
-		return
 	}
-
 }
