@@ -3,16 +3,25 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	"os"
 	"strings"
 	"time"
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 11500*time.Millisecond)
+	file, err := os.Create("log.txt")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer file.Close()
+	errorLogger := log.New(io.MultiWriter(file, os.Stderr), "ERROR: ", log.LstdFlags)
+	ctx, cancel := context.WithTimeout(context.Background(), 5100*time.Millisecond)
 	defer cancel()
-	const timeout = 2 * time.Second
-	const beatInterval = 1 * time.Second
-	heartbeat, v := doTask(ctx, beatInterval)
+	const wdtTimeout = 800 * time.Millisecond
+	const beatInterval = 500 * time.Millisecond
+	heartbeat, v := task(ctx, beatInterval)
 loop:
 	for {
 		select {
@@ -27,13 +36,13 @@ loop:
 			}
 			t := strings.Split(r.String(), "m=")
 			fmt.Printf("value: %v [s]\n", t[1])
-		case <-time.After(timeout):
-			fmt.Println("doTask goroutine's heartbeat stopped")
+		case <-time.After(wdtTimeout):
+			errorLogger.Println("doTask goroutine's heartbeat stopped")
 			break loop
 		}
 	}
 }
-func doTask(
+func task(
 	ctx context.Context,
 	beatInterval time.Duration,
 ) (<-chan struct{}, <-chan time.Time) {
@@ -44,21 +53,20 @@ func doTask(
 		defer close(out)
 		pulse := time.NewTicker(beatInterval)
 		task := time.NewTicker(2 * beatInterval)
-
 		sendPulse := func() {
 			select {
 			case heartbeat <- struct{}{}:
 			default:
 			}
 		}
-		sendValue := func(r time.Time) {
+		sendValue := func(t time.Time) {
 			for {
 				select {
 				case <-ctx.Done():
 					return
 				case <-pulse.C:
 					sendPulse()
-				case out <- r:
+				case out <- t:
 					return
 				}
 			}
@@ -70,12 +78,12 @@ func doTask(
 				return
 			case <-pulse.C:
 				if i == 3 {
-					time.Sleep(3000 * time.Millisecond)
+					time.Sleep(1000 * time.Millisecond)
 				}
 				sendPulse()
 				i++
-			case r := <-task.C:
-				sendValue(r)
+			case t := <-task.C:
+				sendValue(t)
 			}
 		}
 	}()
