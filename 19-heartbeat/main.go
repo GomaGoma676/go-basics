@@ -37,7 +37,7 @@ loop:
 			t := strings.Split(r.String(), "m=")
 			fmt.Printf("value: %v [s]\n", t[1])
 		case <-time.After(wdtTimeout):
-			errorLogger.Println("doTask goroutine's heartbeat stopped")
+			errorLogger.Println("task goroutine's heartbeat stopped")
 			break loop
 		}
 	}
